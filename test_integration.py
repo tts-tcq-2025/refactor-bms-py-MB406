@@ -54,7 +54,7 @@ class IntegrationTest(unittest.TestCase):
         """Test the new enhanced interface with separate warnings and failures"""
         vitals = {
             'temperature': {'value': 96.0, 'unit': 'F'},    # Warning
-            'pulseRate': {'value': 55, 'unit': 'bpm'},      # Critical  
+            'pulseRate': {'value': 58, 'unit': 'bpm'},      # Critical  
             'spo2': {'value': 95, 'unit': '%'}              # Normal
         }
         
