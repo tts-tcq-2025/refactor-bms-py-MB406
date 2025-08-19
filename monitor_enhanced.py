@@ -7,6 +7,8 @@ This module implements:
 2. Support for multiple units (Extension 3)
 3. Extensible language support framework (Extension 2 foundation)
 4. Data transformation pipeline as recommended
+
+NOTE: Build failure resolution - removed duplicate test files
 """
 
 from enum import Enum
