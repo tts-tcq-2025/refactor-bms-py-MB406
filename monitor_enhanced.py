@@ -152,32 +152,38 @@ def process_single_vital(vital_name: str, vital_data: Dict[str, Any]) -> Tuple[V
     
     return condition, message
 
+# Define condition sets as module constants to reduce complexity
+CRITICAL_CONDITIONS = {
+    VitalCondition.HYPO_THERMIA, VitalCondition.HYPER_THERMIA,
+    VitalCondition.BRADY_CARDIA, VitalCondition.TACHY_CARDIA,
+    VitalCondition.LOW_OXYGEN, VitalCondition.HIGH_OXYGEN
+}
+
+WARNING_CONDITIONS = {
+    VitalCondition.NEAR_HYPO, VitalCondition.NEAR_HYPER,
+    VitalCondition.NEAR_BRADY, VitalCondition.NEAR_TACHY,
+    VitalCondition.NEAR_LOW_OXYGEN, VitalCondition.NEAR_HIGH_OXYGEN
+}
+
+def has_conditions_of_type(conditions: List[VitalCondition], condition_set: set) -> bool:
+    """Helper function to check if any conditions match a given set"""
+    return any(condition in condition_set for condition in conditions)
+
 def infer_overall_vitals(conditions: List[VitalCondition]) -> Tuple[bool, str]:
     """
     Transform 4: Infer overall vital status
     Makes logical assumptions for warning and error combinations
     """
-    critical_conditions = {
-        VitalCondition.HYPO_THERMIA, VitalCondition.HYPER_THERMIA,
-        VitalCondition.BRADY_CARDIA, VitalCondition.TACHY_CARDIA,
-        VitalCondition.LOW_OXYGEN, VitalCondition.HIGH_OXYGEN
-    }
-    
-    warning_conditions = {
-        VitalCondition.NEAR_HYPO, VitalCondition.NEAR_HYPER,
-        VitalCondition.NEAR_BRADY, VitalCondition.NEAR_TACHY,
-        VitalCondition.NEAR_LOW_OXYGEN, VitalCondition.NEAR_HIGH_OXYGEN
-    }
-    
-    has_critical = any(condition in critical_conditions for condition in conditions)
-    has_warning = any(condition in warning_conditions for condition in conditions)
-    
-    if has_critical:
+    if has_conditions_of_type(conditions, CRITICAL_CONDITIONS):
         return False, "Critical vital signs detected"
-    elif has_warning:
+    elif has_conditions_of_type(conditions, WARNING_CONDITIONS):
         return False, "Warning conditions detected"
     else:
         return True, "All vitals normal"
+
+def classify_message(message: str) -> str:
+    """Helper function to classify message type"""
+    return "critical" if "critical" in message.lower() else "warning"
 
 def vitals_ok_enhanced(vitals: Dict[str, Any]) -> Tuple[bool, List[Tuple[str, str]], List[Tuple[str, str]]]:
     """
@@ -193,9 +199,10 @@ def vitals_ok_enhanced(vitals: Dict[str, Any]) -> Tuple[bool, List[Tuple[str, st
         conditions.append(condition)
         
         if message:  # Non-empty message indicates an issue
-            if "critical" in message.lower():
+            message_type = classify_message(message)
+            if message_type == "critical":
                 failed.append((vital_name, message))
-            elif "warning" in message.lower():
+            else:
                 warnings.append((vital_name, message))
     
     overall_ok, _ = infer_overall_vitals(conditions)

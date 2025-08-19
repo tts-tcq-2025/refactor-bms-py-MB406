@@ -7,7 +7,8 @@ from monitor_enhanced import (
     VitalCondition,
     TEMP_RANGES,
     PULSE_RANGES,
-    SPO2_RANGES
+    SPO2_RANGES,
+    MESSAGES
 )
 
 class MonitorEnhancedTest(unittest.TestCase):
@@ -80,21 +81,8 @@ class MonitorEnhancedTest(unittest.TestCase):
 
     def test_condition_messages_english(self):
         """Test message translation for English"""
-        expected_messages = {
-            VitalCondition.HYPO_THERMIA: "Temperature critical! Hypothermia detected",
-            VitalCondition.NEAR_HYPO: "Warning: Approaching hypothermia",
-            VitalCondition.NORMAL: "",
-            VitalCondition.NEAR_HYPER: "Warning: Approaching hyperthermia", 
-            VitalCondition.HYPER_THERMIA: "Temperature critical! Hyperthermia detected",
-            VitalCondition.BRADY_CARDIA: "Pulse Rate critical! Bradycardia detected",
-            VitalCondition.NEAR_BRADY: "Warning: Approaching bradycardia",
-            VitalCondition.NEAR_TACHY: "Warning: Approaching tachycardia",
-            VitalCondition.TACHY_CARDIA: "Pulse Rate critical! Tachycardia detected",
-            VitalCondition.LOW_OXYGEN: "Oxygen Saturation critical! Hypoxemia detected",
-            VitalCondition.NEAR_LOW_OXYGEN: "Warning: Approaching low oxygen saturation",
-            VitalCondition.NEAR_HIGH_OXYGEN: "Warning: Approaching high oxygen saturation",
-            VitalCondition.HIGH_OXYGEN: "Oxygen Saturation critical! Hyperoxemia detected"
-        }
+        # Use the imported MESSAGES dictionary instead of duplicating
+        expected_messages = MESSAGES['en']
         
         for condition, expected_msg in expected_messages.items():
             with self.subTest(condition=condition):

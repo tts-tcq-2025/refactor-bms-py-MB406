@@ -9,6 +9,7 @@ This demonstrates:
 3. Extension 3: Multiple unit support (Celsius/Fahrenheit)
 """
 
+from typing import Dict, List, Any
 from monitor_enhanced import (
     vitals_ok_enhanced, 
     set_language,
@@ -16,14 +17,35 @@ from monitor_enhanced import (
     process_single_vital
 )
 
-def demo_early_warning_system():
-    """Demonstrate the early warning system in action"""
-    print("=" * 60)
-    print("BMS ENHANCED MONITOR - EARLY WARNING SYSTEM DEMO")
-    print("=" * 60)
+def display_vitals(vitals: Dict[str, Any]):
+    """Helper function to display vital signs"""
+    for vital_name, vital_data in vitals.items():
+        print(f"  {vital_name}: {vital_data['value']} {vital_data['unit']}")
+
+def display_results(overall_ok: bool, failures: List, warnings: List):
+    """Helper function to display test results"""
+    status = "✅ NORMAL" if overall_ok else "⚠️ ATTENTION REQUIRED"
+    print(f"  Status: {status}")
     
-    # Test cases demonstrating the early warning system
-    test_scenarios = [
+    for vital_name, message in warnings:
+        print(f"    ⚠️  {message}")
+        
+    for vital_name, message in failures:
+        print(f"    🚨 {message}")
+
+def run_test_scenario(scenario: Dict[str, Any]):
+    """Run a single test scenario"""
+    print(f"\nScenario: {scenario['name']}")
+    vitals = scenario['vitals']
+    
+    display_vitals(vitals)
+    overall_ok, failures, warnings = vitals_ok_enhanced(vitals)
+    display_results(overall_ok, failures, warnings)
+    print()
+
+def get_test_scenarios():
+    """Return predefined test scenarios"""
+    return [
         {
             'name': 'Normal Patient',
             'vitals': {
@@ -35,7 +57,7 @@ def demo_early_warning_system():
         {
             'name': 'Early Warning - Approaching Hypothermia',
             'vitals': {
-                'temperature': {'value': 96.0, 'unit': 'F'},  # Warning range
+                'temperature': {'value': 96.0, 'unit': 'F'},
                 'pulseRate': {'value': 70, 'unit': 'bpm'},
                 'spo2': {'value': 96, 'unit': '%'}
             }
@@ -44,27 +66,35 @@ def demo_early_warning_system():
             'name': 'Early Warning - Approaching Tachycardia',
             'vitals': {
                 'temperature': {'value': 98.6, 'unit': 'F'},
-                'pulseRate': {'value': 99, 'unit': 'bpm'},     # Warning range
+                'pulseRate': {'value': 99, 'unit': 'bpm'},
                 'spo2': {'value': 95, 'unit': '%'}
             }
         },
         {
             'name': 'Critical Patient - Multiple Issues',
             'vitals': {
-                'temperature': {'value': 104, 'unit': 'F'},   # Critical high
-                'pulseRate': {'value': 55, 'unit': 'bpm'},    # Critical low
-                'spo2': {'value': 88, 'unit': '%'}            # Critical low
+                'temperature': {'value': 104, 'unit': 'F'},
+                'pulseRate': {'value': 55, 'unit': 'bpm'},
+                'spo2': {'value': 88, 'unit': '%'}
             }
         },
         {
             'name': 'Patient with Celsius Temperature',
             'vitals': {
-                'temperature': {'value': 37, 'unit': 'C'},    # Normal (98.6F)
+                'temperature': {'value': 37, 'unit': 'C'},
                 'pulseRate': {'value': 80, 'unit': 'bpm'},
                 'spo2': {'value': 98, 'unit': '%'}
             }
         }
     ]
+
+def demo_early_warning_system():
+    """Demonstrate the early warning system in action"""
+    print("=" * 60)
+    print("BMS ENHANCED MONITOR - EARLY WARNING SYSTEM DEMO")
+    print("=" * 60)
+    
+    test_scenarios = get_test_scenarios()
     
     # Test in English
     set_language('en')
@@ -72,29 +102,7 @@ def demo_early_warning_system():
     print("-" * 40)
     
     for scenario in test_scenarios:
-        print(f"\nScenario: {scenario['name']}")
-        vitals = scenario['vitals']
-        
-        # Display input values
-        for vital_name, vital_data in vitals.items():
-            print(f"  {vital_name}: {vital_data['value']} {vital_data['unit']}")
-        
-        # Check vitals
-        overall_ok, failures, warnings = vitals_ok_enhanced(vitals)
-        
-        # Display results
-        status = "✅ NORMAL" if overall_ok else "⚠️ ATTENTION REQUIRED"
-        print(f"  Status: {status}")
-        
-        if warnings:
-            for vital_name, message in warnings:
-                print(f"    ⚠️  {message}")
-                
-        if failures:
-            for vital_name, message in failures:
-                print(f"    🚨 {message}")
-        
-        print()
+        run_test_scenario(scenario)
     
     # Test in German
     set_language('de')
@@ -103,19 +111,7 @@ def demo_early_warning_system():
     
     # Test one critical scenario in German
     critical_scenario = test_scenarios[3]  # Critical patient
-    print(f"\nSzenario: {critical_scenario['name']}")
-    vitals = critical_scenario['vitals']
-    
-    for vital_name, vital_data in vitals.items():
-        print(f"  {vital_name}: {vital_data['value']} {vital_data['unit']}")
-    
-    overall_ok, failures, warnings = vitals_ok_enhanced(vitals)
-    status = "✅ NORMAL" if overall_ok else "⚠️ ACHTUNG ERFORDERLICH"
-    print(f"  Status: {status}")
-    
-    if failures:
-        for vital_name, message in failures:
-            print(f"    🚨 {message}")
+    run_test_scenario(critical_scenario)
 
 def demo_data_transformation_pipeline():
     """Demonstrate the data transformation pipeline approach"""
