@@ -185,11 +185,17 @@ def classify_message(message: str) -> str:
     """Helper function to classify message type"""
     return "critical" if "critical" in message.lower() else "warning"
 
-def vitals_ok_enhanced(vitals: Dict[str, Any]) -> Tuple[bool, List[Tuple[str, str]], List[Tuple[str, str]]]:
-    """
-    Enhanced vitals checking with early warning support
-    Returns: (overall_ok, critical_failures, warnings)
-    """
+def categorize_single_message(vital_name: str, message: str, failed: List, warnings: List):
+    """Categorize a single message as critical or warning"""
+    if message:  # Non-empty message indicates an issue
+        message_type = classify_message(message)
+        if message_type == "critical":
+            failed.append((vital_name, message))
+        else:
+            warnings.append((vital_name, message))
+
+def process_vital_messages(vitals: Dict[str, Any]) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]], List[VitalCondition]]:
+    """Process all vitals and categorize messages"""
     failed = []
     warnings = []
     conditions = []
@@ -197,16 +203,17 @@ def vitals_ok_enhanced(vitals: Dict[str, Any]) -> Tuple[bool, List[Tuple[str, st
     for vital_name, vital_data in vitals.items():
         condition, message = process_single_vital(vital_name, vital_data)
         conditions.append(condition)
-        
-        if message:  # Non-empty message indicates an issue
-            message_type = classify_message(message)
-            if message_type == "critical":
-                failed.append((vital_name, message))
-            else:
-                warnings.append((vital_name, message))
+        categorize_single_message(vital_name, message, failed, warnings)
     
+    return failed, warnings, conditions
+
+def vitals_ok_enhanced(vitals: Dict[str, Any]) -> Tuple[bool, List[Tuple[str, str]], List[Tuple[str, str]]]:
+    """
+    Enhanced vitals checking with early warning support
+    Returns: (overall_ok, critical_failures, warnings)
+    """
+    failed, warnings, conditions = process_vital_messages(vitals)
     overall_ok, _ = infer_overall_vitals(conditions)
-    
     return overall_ok, failed, warnings
 
 def set_language(language_code: str):

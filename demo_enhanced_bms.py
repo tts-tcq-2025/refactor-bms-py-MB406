@@ -22,16 +22,21 @@ def display_vitals(vitals: Dict[str, Any]):
     for vital_name, vital_data in vitals.items():
         print(f"  {vital_name}: {vital_data['value']} {vital_data['unit']}")
 
-def display_results(overall_ok: bool, failures: List, warnings: List):
-    """Helper function to display test results"""
+def display_status(overall_ok: bool):
+    """Helper function to display status"""
     status = "✅ NORMAL" if overall_ok else "⚠️ ATTENTION REQUIRED"
     print(f"  Status: {status}")
-    
-    for vital_name, message in warnings:
-        print(f"    ⚠️  {message}")
-        
-    for vital_name, message in failures:
-        print(f"    🚨 {message}")
+
+def display_messages(messages: List, icon: str):
+    """Helper function to display messages with icon"""
+    for vital_name, message in messages:
+        print(f"    {icon} {message}")
+
+def display_results(overall_ok: bool, failures: List, warnings: List):
+    """Helper function to display test results"""
+    display_status(overall_ok)
+    display_messages(warnings, "⚠️ ")
+    display_messages(failures, "🚨")
 
 def run_test_scenario(scenario: Dict[str, Any]):
     """Run a single test scenario"""
