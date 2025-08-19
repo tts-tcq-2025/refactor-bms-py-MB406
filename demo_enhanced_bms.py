@@ -78,9 +78,9 @@ def get_test_scenarios():
         {
             'name': 'Critical Patient - Multiple Issues',
             'vitals': {
-                'temperature': {'value': 104, 'unit': 'F'},
-                'pulseRate': {'value': 55, 'unit': 'bpm'},
-                'spo2': {'value': 88, 'unit': '%'}
+                'temperature': {'value': 105, 'unit': 'F'},
+                'pulseRate': {'value': 54, 'unit': 'bpm'},
+                'spo2': {'value': 87, 'unit': '%'}
             }
         },
         {
