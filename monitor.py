@@ -47,13 +47,10 @@ def check_single_vital(vital_name: str, value: Union[int, float]) -> Tuple[bool,
     if vital_name not in VITAL_LIMITS:
         return False, f"Unknown vital: {vital_name}"
     
-    try:
-        limits = VITAL_LIMITS[vital_name]
-        is_ok = is_within_limits(value, limits)
-        message = "" if is_ok else VITAL_MESSAGES[vital_name]
-        return is_ok, message
-    except Exception:
-        return False, f"Error checking {vital_name}"
+    limits = VITAL_LIMITS[vital_name]
+    is_ok = is_within_limits(value, limits)
+    message = "" if is_ok else VITAL_MESSAGES[vital_name]
+    return is_ok, message
 
 def check_vitals(vitals: Dict[str, Union[int, float]]) -> List[Tuple[str, str]]:
     """
@@ -93,7 +90,6 @@ def format_alert_message(message: str, vital_name: str = None) -> str:
 def blink_alert(message: str, cycles: int = 6, interval: float = 1) -> None:
     """
     Display blinking alert with improved formatting.
-    Enhanced with better visual feedback and type hints.
     
     Args:
         message: Alert message to display
@@ -102,17 +98,13 @@ def blink_alert(message: str, cycles: int = 6, interval: float = 1) -> None:
     """
     print(f"\n*** ALERT: {message} ***")
     
-    try:
-        for cycle in range(cycles):
-            print('\r* ', end='', flush=True)
-            sleep(interval)
-            print('\r *', end='', flush=True)
-            sleep(interval)
-        print('\r  ', flush=True)
-    except KeyboardInterrupt:
-        print("\r[Alert interrupted by user]")
-    finally:
-        print()  # Ensure newline after alert
+    for cycle in range(cycles):
+        print('\r* ', end='', flush=True)
+        sleep(interval)
+        print('\r *', end='', flush=True)
+        sleep(interval)
+    print('\r  ', flush=True)
+    print()  # Ensure newline after alert
 
 def vitals_ok(vitals: Dict[str, Union[int, float]]) -> Tuple[bool, List[Tuple[str, str]]]:
     """
@@ -131,7 +123,6 @@ def vitals_ok(vitals: Dict[str, Union[int, float]]) -> Tuple[bool, List[Tuple[st
 def handle_vitals(vitals: Dict[str, Union[int, float]]) -> bool:
     """
     Handle vital signs checking with alert display.
-    Enhanced with improved error handling.
     
     Args:
         vitals: Dictionary of vital signs to check
@@ -139,20 +130,14 @@ def handle_vitals(vitals: Dict[str, Union[int, float]]) -> bool:
     Returns:
         bool: True if all vitals are OK, False otherwise
     """
-    try:
-        ok, failed = vitals_ok(vitals)
-        
-        if not ok:
-            for vital_name, msg in failed:
-                formatted_msg = format_alert_message(msg, vital_name)
-                blink_alert(formatted_msg)
-        
-        return ok
-        
-    except Exception as e:
-        error_msg = f"Error processing vitals: {e}"
-        blink_alert(error_msg)
-        return False
+    ok, failed = vitals_ok(vitals)
+    
+    if not ok:
+        for vital_name, msg in failed:
+            formatted_msg = format_alert_message(msg, vital_name)
+            blink_alert(formatted_msg)
+    
+    return ok
 
 # Enhanced utility functions for better maintainability
 def get_vital_limits(vital_name: str) -> Dict[str, Union[int, float]]:
@@ -202,12 +187,11 @@ def validate_vitals_input(vitals: Dict[str, Union[int, float]]) -> bool:
     if not isinstance(vitals, dict):
         return False
     
-    for vital_name, value in vitals.items():
-        if not isinstance(vital_name, str):
-            return False
-        if not isinstance(value, (int, float)):
-            return False
-        if vital_name not in VITAL_LIMITS:
-            return False
-    
-    return True
+    return all(_is_valid_vital_entry(name, value) 
+               for name, value in vitals.items())
+
+def _is_valid_vital_entry(vital_name, value) -> bool:
+    """Helper function to validate a single vital entry"""
+    return (isinstance(vital_name, str) and 
+            isinstance(value, (int, float)) and 
+            vital_name in VITAL_LIMITS)
